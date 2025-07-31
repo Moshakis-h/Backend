@@ -47,12 +47,12 @@ const login = async (req, res) => {
 
     // تحديد إعدادات الكوكي
     const cookieOptions = {
-      httpOnly: true,
-      secure: true, // يجب أن يكون true في الإنتاج
-      sameSite: 'none', // ضروري للتواصل عبر النطاقات
-      maxAge: 24 * 60 * 60 * 1000,
-      domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined
-    };
+  httpOnly: true,
+  secure: true,
+  sameSite: 'none',
+  maxAge: 24 * 60 * 60 * 1000,
+  // إزالة خاصية domain تماماً
+};
 
     res
       .cookie("token", token, cookieOptions)
@@ -72,13 +72,19 @@ const login = async (req, res) => {
 
 const logout = (req, res) => {
   const cookieOptions = {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'none',
-    domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined
-  };
+  httpOnly: true,
+  secure: true,
+  sameSite: 'none',
+  maxAge: 24 * 60 * 60 * 1000,
+  // إزالة خاصية domain تماماً
+};
   
-  res.clearCookie("token", cookieOptions).json({ message: "You are logged out" });
+res.clearCookie("token", {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'none'
+}).json({ message: "You are logged out" });
+
 };
 
 const verify = async (req, res) => {
