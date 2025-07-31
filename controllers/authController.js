@@ -45,28 +45,42 @@ const login = async (req, res) => {
     // إنشاء التوكن
     const token = createToken(user);
 
-    // إرجاع التوكن في الجسم بدلاً من الكوكي
-    res.json({
-      message: "Login successful",
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
-    });
+    // تحديد إعدادات الكوكي
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true, // يجب أن يكون true في الإنتاج
+      sameSite: 'none', // ضروري للتواصل عبر النطاقات
+      maxAge: 24 * 60 * 60 * 1000,
+      domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined
+    };
+
+    res
+      .cookie("token", token, cookieOptions)
+      .json({
+        message: "Login successful",
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 };
 
 const logout = (req, res) => {
-  // إزالة إعدادات الكوكي
-  res.json({ message: "You are logged out" });
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined
+  };
+  
+  res.clearCookie("token", cookieOptions).json({ message: "You are logged out" });
 };
 
-// باقي الكود يبقى كما هو...
 const verify = async (req, res) => {
   try {
     if (!req.user) {
