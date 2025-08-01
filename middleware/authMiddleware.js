@@ -1,55 +1,33 @@
-// authMiddleware.js
-const jwt = require("jsonwebtoken");
-const User = require("../models/User"); // تأكد من استيراد نموذج المستخدم
+const jwt = require('jsonwebtoken');
 
-const verifyToken = async (req, res, next) => {
+const verifyToken = (req, res, next) => {
   const token = req.cookies.token;
-
+  
   if (!token) {
-    return res.status(401).json({ 
-      isAuthenticated: false,
-      message: "No token provided" 
-    });
+    return res.status(200).json({ isAuthenticated: false });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // جلب أحدث بيانات المستخدم من قاعدة البيانات
-    const user = await User.findById(decoded.id);
-    if (!user) {
-      return res.status(404).json({ 
-        isAuthenticated: false,
-        message: "User not found" 
-      });
-    }
-
-    // إضافة أحدث بيانات المستخدم إلى req.user
-    req.user = {
-      id: user._id,
-      role: user.role,
-      redirectPage: user.redirectPage // القيمة المحدثة من قاعدة البيانات
-    };
-
+    req.user = decoded;
     next();
   } catch (err) {
-    return res.status(403).json({ 
-      isAuthenticated: false,
-      message: "Invalid token" 
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      partitioned: true
     });
+    return res.status(200).json({ isAuthenticated: false });
   }
 };
 
-// ... بقية الكود
 const isAdmin = (req, res, next) => {
-  if (req.user && req.user.role === "admin") {
+  if (req.user && req.user.role === 'admin') {
     next();
   } else {
-    return res.status(403).json({ message: "Access denied. Admins only." });
+    res.status(403).json({ message: "Access denied" });
   }
 };
 
 module.exports = { verifyToken, isAdmin };
-
-
-

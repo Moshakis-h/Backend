@@ -31,28 +31,25 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // البحث بالإيميل (غير حساس لحالة الأحرف)
     const user = await User.findOne({ 
       email: { $regex: new RegExp(`^${email}$`, 'i') } 
     });
     
     if (!user) return res.status(401).json({ message: "Invalid login data" });
 
-    // التحقق من كلمة المرور
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid login data" });
 
-    // إنشاء التوكن
     const token = createToken(user);
 
-    // تحديد إعدادات الكوكي
     const cookieOptions = {
-  httpOnly: true,
-  secure: true,
-  sameSite: 'none',
-  maxAge: 24 * 60 * 60 * 1000,
-  // إزالة خاصية domain تماماً
-};
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 24 * 60 * 60 * 1000,
+      partitioned: true,
+      domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined
+    };
 
     res
       .cookie("token", token, cookieOptions)
@@ -72,19 +69,14 @@ const login = async (req, res) => {
 
 const logout = (req, res) => {
   const cookieOptions = {
-  httpOnly: true,
-  secure: true,
-  sameSite: 'none',
-  maxAge: 24 * 60 * 60 * 1000,
-  // إزالة خاصية domain تماماً
-};
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    partitioned: true,
+    domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined
+  };
   
-res.clearCookie("token", {
-  httpOnly: true,
-  secure: true,
-  sameSite: 'none'
-}).json({ message: "You are logged out" });
-
+  res.clearCookie("token", cookieOptions).json({ message: "You are logged out" });
 };
 
 const verify = async (req, res) => {
