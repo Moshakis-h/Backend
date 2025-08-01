@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 const connectDB = require("./config/dbConnect");
-const corsOptions = require("./config/corsOptions.js");
+const corsOptions = require("./config/corsOptions");
 const authRoutes = require("./routes/authRoutes");
 const protectedRoutes = require("./routes/protected");
 const adminRoutes = require("./routes/adminRoutes");
@@ -14,29 +14,15 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const AdditionPrice = require("./models/AdditionPrice");
 
 const app = express();
-const PORT = process.env.PORT || "5000";
+const PORT = process.env.PORT || 5000;
 
 connectDB();
-
-// إضافة تصحيح الأخطاء
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-  process.exit(1);
-});
-
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Rejection:', err);
-  process.exit(1);
-});
 
 app.use(express.json());
 app.use(cors(corsOptions));
 
-// السماح بطلبات OPTIONS
-app.options('*', cors(corsOptions));
-
 app.get('/', (req, res) => {
-  res.send("hi");
+  res.send("Backend server is running");
 });
 
 app.get('/api/public/settings', async (req, res) => {
@@ -71,12 +57,13 @@ app.get('/api/public/addition-prices', async (req, res) => {
 });
 
 app.use((req, res) => {
-  res.status(404);
-  res.sendFile(path.join(__dirname, "/views", "/404.html"));
+  res.status(404).send("Not found");
 });
 
-mongoose.connection.once("open", () => {
-  app.listen(PORT, () => {
-    console.log(`server running on ${PORT}`);
-  });
+mongoose.connection.once('open', () => {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+});
+
+mongoose.connection.on('error', err => {
+  console.error('MongoDB connection error:', err);
 });

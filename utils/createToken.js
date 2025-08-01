@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const createToken = (user) => {
   try {
     if (!user || !user._id) {
-      console.error("Invalid user object for token creation");
       return null;
     }
     
@@ -18,7 +17,6 @@ const createToken = (user) => {
       }
     );
   } catch (err) {
-    console.error('Token creation error:', err);
     return null;
   }
 };

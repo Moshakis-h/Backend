@@ -7,16 +7,13 @@ const register = async (req, res) => {
   const { name, email, phone, password, role } = req.body;
 
   if (!name || !email || !phone || !password)
-    return res.status(400).json({ message: "Please fill in all fields. " });
+    return res.status(400).json({ message: "Please fill in all fields." });
 
   try {
     const emailExists = await User.findOne({ email });
     const phoneExists = await User.findOne({ phone });
 
-    if (emailExists)
-      return res.status(409).json({ message: "There is an error in the registration information." });
-
-    if (phoneExists)
+    if (emailExists || phoneExists)
       return res.status(409).json({ message: "There is an error in the registration information." });
 
     const newUser = new User({ name, email, phone, password, role });
@@ -43,9 +40,7 @@ const login = async (req, res) => {
 
     const token = createToken(user);
     
-    // التأكد من وجود التوكن قبل الإرسال
     if (!token) {
-      console.error("Token generation failed for user:", user.email);
       return res.status(500).json({ message: "Token generation failed" });
     }
 
@@ -60,7 +55,6 @@ const login = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error("Login error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
