@@ -16,10 +16,22 @@ const AdditionPrice = require("./models/AdditionPrice");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// تحقق من وجود JWT_SECRET
+if (!process.env.JWT_SECRET) {
+  console.error("FATAL ERROR: JWT_SECRET is not defined.");
+  process.exit(1);
+}
+
 connectDB();
 
+// إعدادات CORS
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
-app.use(cors(corsOptions));
 
 app.get('/', (req, res) => {
   res.send("Backend server is running");

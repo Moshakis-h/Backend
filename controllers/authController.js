@@ -1,7 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const createToken = require("../utils/createToken");
 
 const register = async (req, res) => {
   const { name, email, phone, password, role } = req.body;
@@ -38,11 +37,17 @@ const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid login data" });
 
-    const token = createToken(user);
-    
-    if (!token) {
-      return res.status(500).json({ message: "Token generation failed" });
-    }
+    // إنشاء التوكن مباشرة
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d"
+      }
+    );
 
     res.json({
       message: "Login successful",
@@ -55,6 +60,7 @@ const login = async (req, res) => {
       }
     });
   } catch (err) {
+    console.error("Login error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
