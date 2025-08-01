@@ -42,6 +42,12 @@ const login = async (req, res) => {
     if (!isMatch) return res.status(401).json({ message: "Invalid login data" });
 
     const token = createToken(user);
+    
+    // التأكد من وجود التوكن قبل الإرسال
+    if (!token) {
+      console.error("Token generation failed for user:", user.email);
+      return res.status(500).json({ message: "Token generation failed" });
+    }
 
     res.json({
       message: "Login successful",
@@ -54,6 +60,7 @@ const login = async (req, res) => {
       }
     });
   } catch (err) {
+    console.error("Login error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };

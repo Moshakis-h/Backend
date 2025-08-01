@@ -18,8 +18,22 @@ const PORT = process.env.PORT || "5000";
 
 connectDB();
 
+// إضافة تصحيح الأخطاء
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err);
+  process.exit(1);
+});
+
 app.use(express.json());
 app.use(cors(corsOptions));
+
+// السماح بطلبات OPTIONS
+app.options('*', cors(corsOptions));
 
 app.get('/', (req, res) => {
   res.send("hi");
