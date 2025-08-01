@@ -1,11 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { verifyToken, isAdmin } = require("../middleware/authMiddleware");
+const { verifyToken } = require("../middleware/authMiddleware");
 
-// routes/protected.js
 router.get("/user", verifyToken, async (req, res) => {
   try {
-    // الآن req.user يحتوي على أحدث البيانات من قاعدة البيانات
     res.status(200).json({ 
       user: {
         id: req.user.id,
@@ -13,7 +11,7 @@ router.get("/user", verifyToken, async (req, res) => {
         email: req.user.email,
         phone: req.user.phone,
         role: req.user.role,
-        redirectPage: req.user.redirectPage // القيمة المحدثة
+        redirectPage: req.user.redirectPage
       }
     });
   } catch (err) {
@@ -26,6 +24,3 @@ router.get("/admin", verifyToken, isAdmin, (req, res) => {
 });
 
 module.exports = router;
-
-
-

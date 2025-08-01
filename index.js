@@ -2,32 +2,9 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const cookieParser = require("cookie-parser");
 const path = require("path");
 const connectDB = require("./config/dbConnect");
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (process.env.NODE_ENV === 'development') {
-      callback(null, true);
-    } else {
-      const allowedOrigins = [
-        'https://your-frontend-domain.com',
-        'https://www.your-frontend-domain.com'
-      ];
-      
-      if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    }
-  },
-  credentials: true,
-  exposedHeaders: ['set-cookie'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-};
-
+const corsOptions = require("./config/corsOptions.js");
 const authRoutes = require("./routes/authRoutes");
 const protectedRoutes = require("./routes/protected");
 const adminRoutes = require("./routes/adminRoutes");
@@ -41,9 +18,8 @@ const PORT = process.env.PORT || "5000";
 
 connectDB();
 
-app.use(cors(corsOptions));
 app.use(express.json());
-app.use(cookieParser());
+app.use(cors(corsOptions));
 
 app.get('/', (req, res) => {
   res.send("hi");

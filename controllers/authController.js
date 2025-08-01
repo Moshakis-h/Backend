@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const createToken = require("../utils/createToken");
 
 const register = async (req, res) => {
@@ -42,49 +43,35 @@ const login = async (req, res) => {
 
     const token = createToken(user);
 
-    const cookieOptions = {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 24 * 60 * 60 * 1000,
-      partitioned: true,
-
-    };
-
-    res
-      .cookie("token", token, cookieOptions)
-      .json({
-        message: "Login successful",
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role
-        }
-      });
+    res.json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 };
 
 const logout = (req, res) => {
-  const cookieOptions = {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'none',
-    partitioned: true,
-  };
-  
-  res.clearCookie("token", cookieOptions).json({ message: "You are logged out" });
+  res.json({ message: "You are logged out" });
 };
 
 const verify = async (req, res) => {
   try {
-    if (!req.user) {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
       return res.status(200).json({ isAuthenticated: false });
     }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-password');
     
-    const user = await User.findById(req.user.id).select('-password');
     if (!user) {
       return res.status(200).json({ isAuthenticated: false });
     }
@@ -107,7 +94,13 @@ const verify = async (req, res) => {
 
 const admin = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-password');
     res.json(user);
   } catch (err) {
     res.status(500).json({ message: "حدث خطأ في السيرفر" });

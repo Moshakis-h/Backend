@@ -8,6 +8,6 @@ router.post("/login", login);
 router.post("/logout", logout);
 
 router.get("/verify", verifyToken, verify); 
-router.get("/admin", admin); // إضافة مسار للتحقق من صلاحية الإدمن
+router.get("/admin", verifyToken, admin);
 
 module.exports = router;
