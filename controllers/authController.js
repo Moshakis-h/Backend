@@ -31,18 +31,15 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // البحث بالإيميل (غير حساس لحالة الأحرف)
     const user = await User.findOne({ 
       email: { $regex: new RegExp(`^${email}$`, 'i') } 
     });
     
     if (!user) return res.status(401).json({ message: "Invalid login data" });
 
-    // التحقق من كلمة المرور
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid login data" });
 
-    // إنشاء التوكن
     const token = createToken(user);
 
     res.json({
@@ -66,16 +63,12 @@ const logout = (req, res) => {
 
 const verify = async (req, res) => {
   try {
-    if (!req.user) {
-      return res.status(200).json({ isAuthenticated: false });
-    }
-    
     const user = await User.findById(req.user.id).select('-password');
     if (!user) {
-      return res.status(200).json({ isAuthenticated: false });
+      return res.json({ isAuthenticated: false });
     }
 
-    res.status(200).json({
+    res.json({
       isAuthenticated: true,
       role: user.role,
       user: {
@@ -87,7 +80,7 @@ const verify = async (req, res) => {
       }
     });
   } catch (err) {
-    res.status(200).json({ isAuthenticated: false });
+    res.json({ isAuthenticated: false });
   }
 };
 
