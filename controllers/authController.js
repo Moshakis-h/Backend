@@ -1,18 +1,21 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const createToken = require("../utils/createToken");
 
 const register = async (req, res) => {
   const { name, email, phone, password, role } = req.body;
 
   if (!name || !email || !phone || !password)
-    return res.status(400).json({ message: "Please fill in all fields." });
+    return res.status(400).json({ message: "Please fill in all fields. " });
 
   try {
     const emailExists = await User.findOne({ email });
     const phoneExists = await User.findOne({ phone });
 
-    if (emailExists || phoneExists)
+    if (emailExists)
+      return res.status(409).json({ message: "There is an error in the registration information." });
+
+    if (phoneExists)
       return res.status(409).json({ message: "There is an error in the registration information." });
 
     const newUser = new User({ name, email, phone, password, role });
@@ -37,17 +40,7 @@ const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid login data" });
 
-    // إنشاء التوكن مباشرة
-    const token = jwt.sign(
-      {
-        id: user._id,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1d"
-      }
-    );
+    const token = createToken(user);
 
     res.json({
       message: "Login successful",
@@ -60,7 +53,6 @@ const login = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error("Login error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -71,14 +63,11 @@ const logout = (req, res) => {
 
 const verify = async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
+    if (!req.user) {
       return res.status(200).json({ isAuthenticated: false });
     }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-password');
     
+    const user = await User.findById(req.user.id).select('-password');
     if (!user) {
       return res.status(200).json({ isAuthenticated: false });
     }
@@ -101,13 +90,7 @@ const verify = async (req, res) => {
 
 const admin = async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-      return res.status(401).json({ message: "Not authorized" });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-password');
+    const user = await User.findById(req.user.id).select('-password');
     res.json(user);
   } catch (err) {
     res.status(500).json({ message: "حدث خطأ في السيرفر" });

@@ -2,9 +2,32 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const path = require("path");
 const connectDB = require("./config/dbConnect");
-const corsOptions = require("./config/corsOptions");
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (process.env.NODE_ENV === 'development') {
+      callback(null, true);
+    } else {
+      const allowedOrigins = [
+        'https://your-frontend-domain.com',
+        'https://www.your-frontend-domain.com'
+      ];
+      
+      if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    }
+  },
+  credentials: true,
+  exposedHeaders: ['set-cookie'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
 const authRoutes = require("./routes/authRoutes");
 const protectedRoutes = require("./routes/protected");
 const adminRoutes = require("./routes/adminRoutes");
@@ -14,27 +37,16 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const AdditionPrice = require("./models/AdditionPrice");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-// تحقق من وجود JWT_SECRET
-if (!process.env.JWT_SECRET) {
-  console.error("FATAL ERROR: JWT_SECRET is not defined.");
-  process.exit(1);
-}
+const PORT = process.env.PORT || "5000";
 
 connectDB();
 
-// إعدادات CORS
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
+app.use(cors(corsOptions));
 app.use(express.json());
+app.use(cookieParser());
 
 app.get('/', (req, res) => {
-  res.send("Backend server is running");
+  res.send("hi");
 });
 
 app.get('/api/public/settings', async (req, res) => {
@@ -69,13 +81,12 @@ app.get('/api/public/addition-prices', async (req, res) => {
 });
 
 app.use((req, res) => {
-  res.status(404).send("Not found");
+  res.status(404);
+  res.sendFile(path.join(__dirname, "/views", "/404.html"));
 });
 
-mongoose.connection.once('open', () => {
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-});
-
-mongoose.connection.on('error', err => {
-  console.error('MongoDB connection error:', err);
+mongoose.connection.once("open", () => {
+  app.listen(PORT, () => {
+    console.log(`server running on ${PORT}`);
+  });
 });
