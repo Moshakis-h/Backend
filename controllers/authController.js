@@ -48,7 +48,7 @@ const login = async (req, res) => {
       sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000,
       partitioned: true,
-      domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined
+
     };
 
     res
@@ -73,7 +73,6 @@ const logout = (req, res) => {
     secure: true,
     sameSite: 'none',
     partitioned: true,
-    domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined
   };
   
   res.clearCookie("token", cookieOptions).json({ message: "You are logged out" });
