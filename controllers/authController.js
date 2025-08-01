@@ -31,15 +31,18 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // البحث بالإيميل (غير حساس لحالة الأحرف)
     const user = await User.findOne({ 
       email: { $regex: new RegExp(`^${email}$`, 'i') } 
     });
     
     if (!user) return res.status(401).json({ message: "Invalid login data" });
 
+    // التحقق من كلمة المرور
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid login data" });
 
+    // إنشاء التوكن
     const token = createToken(user);
 
     res.json({
@@ -84,10 +87,10 @@ const verify = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error("Verify error:", err);
     res.status(200).json({ isAuthenticated: false });
   }
 };
+
 const admin = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
