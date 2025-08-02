@@ -5,9 +5,9 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 const connectDB = require("./config/dbConnect");
+const corsOptions = require("./config/corsOptions.js");
 const authRoutes = require("./routes/authRoutes");
 const protectedRoutes = require("./routes/protected");
-const corsOptions = require("./config/corsOptions");
 const adminRoutes = require("./routes/adminRoutes");
 const productRoutes = require('./routes/productRoutes');
 const SiteSettings = require("./models/SiteSettings");
@@ -19,15 +19,15 @@ const PORT = process.env.PORT || "5000";
 
 connectDB();
 
-
-app.use(cors(corsOptions));
 app.use(express.json());
+app.use(cors(corsOptions));
 app.use(cookieParser());
 
 app.get('/', (req, res) => {
   res.send("hi");
 });
 
+// مسار لجلب إعدادات الموقع
 app.get('/api/public/settings', async (req, res) => {
   try {
     const settings = await SiteSettings.findOne();
@@ -49,6 +49,7 @@ app.use("/api/protected", protectedRoutes);
 app.use("/api/admin", adminRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/payment', paymentRoutes);
+
 
 app.get('/api/public/addition-prices', async (req, res) => {
   try {
