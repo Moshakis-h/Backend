@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/User"); // أضف استيراد نموذج المستخدم
 
-const verifyToken = (req, res, next) => {
+const verifyToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -11,7 +12,14 @@ const verifyToken = (req, res, next) => {
   
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    
+    // جلب أحدث بيانات المستخدم من قاعدة البيانات
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+    
+    req.user = user; // استخدام البيانات المحدثة
     next();
   } catch (err) {
     return res.status(401).json({ message: "Invalid or expired token" });

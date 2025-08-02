@@ -8,12 +8,12 @@ router.get("/user", verifyToken, async (req, res) => {
     // الآن req.user يحتوي على أحدث البيانات من قاعدة البيانات
     res.status(200).json({ 
       user: {
-        id: req.user.id,
+        id: req.user._id,
         name: req.user.name,
         email: req.user.email,
         phone: req.user.phone,
         role: req.user.role,
-        redirectPage: req.user.redirectPage // القيمة المحدثة
+        redirectPage: req.user.redirectPage
       }
     });
   } catch (err) {
