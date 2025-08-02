@@ -27,4 +27,9 @@ router.get("/user", verifyToken, async (req, res) => {
   }
 });
 
-// ... بقية الكود
+
+router.get("/admin", verifyToken, isAdmin, (req, res) => {
+  res.json({ user: req.user });
+});
+
+module.exports = router;
