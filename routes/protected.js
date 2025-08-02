@@ -1,19 +1,25 @@
 const express = require("express");
 const router = express.Router();
 const { verifyToken, isAdmin } = require("../middleware/authMiddleware");
+const User = require("../models/User"); // تأكد من استيراد نموذج المستخدم
 
-// routes/protected.js
 router.get("/user", verifyToken, async (req, res) => {
   try {
-    // الآن req.user يحتوي على أحدث البيانات من قاعدة البيانات
+    // جلب أحدث بيانات المستخدم من قاعدة البيانات
+    const user = await User.findById(req.user.id).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ message: "المستخدم غير موجود" });
+    }
+    
     res.status(200).json({ 
       user: {
-        id: req.user._id,
-        name: req.user.name,
-        email: req.user.email,
-        phone: req.user.phone,
-        role: req.user.role,
-        redirectPage: req.user.redirectPage
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        redirectPage: user.redirectPage // القيمة المحدثة من قاعدة البيانات
       }
     });
   } catch (err) {
@@ -21,8 +27,4 @@ router.get("/user", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/admin", verifyToken, isAdmin, (req, res) => {
-  res.json({ user: req.user });
-});
-
-module.exports = router;
+// ... بقية الكود
