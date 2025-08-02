@@ -7,6 +7,7 @@ const path = require("path");
 const connectDB = require("./config/dbConnect");
 const authRoutes = require("./routes/authRoutes");
 const protectedRoutes = require("./routes/protected");
+const corsOptions = require("./config/corsOptions");
 const adminRoutes = require("./routes/adminRoutes");
 const productRoutes = require('./routes/productRoutes');
 const SiteSettings = require("./models/SiteSettings");
@@ -18,16 +19,6 @@ const PORT = process.env.PORT || "5000";
 
 connectDB();
 
-// إعدادات CORS المحدثة
-const corsOptions = {
-  origin: [
-    'https://royalbuffet.vercel.app',
-    'http://localhost:3000'
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-};
 
 app.use(cors(corsOptions));
 app.use(express.json());
