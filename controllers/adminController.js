@@ -62,10 +62,10 @@ const updateSettings = async (req, res) => {
 
     // خريطة تحويل العملة إلى رمز الدولة
     const currencyToCountryCode = {
-      "دك": { country: "الكويت", countryCode: "+965" },
-      "دا": { country: "الإمارات", countryCode: "+971" },
-      "رق": { country: "قطر", countryCode: "+974" },
-      "رس": { country: "السعودية", countryCode: "+966" }
+      "د.ك": { country: "الكويت", countryCode: "+965" },
+      "د.ا": { country: "الإمارات", countryCode: "+971" },
+      "ر.ق": { country: "قطر", countryCode: "+974" },
+      "ر.س": { country: "السعودية", countryCode: "+966" }
     };
 
     const countryInfo = currencyToCountryCode[currency];

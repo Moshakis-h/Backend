@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const siteSettingsSchema = new mongoose.Schema({
   currency: {
     type: String,
-    enum: ["دك", "دا", "رق", "رس"],
+    enum: ["د.ك", "د.ا", "ر.ق", "ر.س"],
     required: true
   },
   country: {
