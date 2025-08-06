@@ -49,7 +49,6 @@ const login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone, // أضف هذا السطر
         role: user.role
       }
     });
@@ -76,7 +75,7 @@ const verify = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone, // أضف هذا السطر
+        phone: user.phone,
         redirectPage: user.redirectPage
       }
     });
@@ -84,6 +83,7 @@ const verify = async (req, res) => {
     res.json({ isAuthenticated: false });
   }
 };
+
 const admin = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
@@ -94,3 +94,4 @@ const admin = async (req, res) => {
 };
 
 module.exports = { register, login, logout, verify, admin };
+
