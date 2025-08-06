@@ -84,7 +84,7 @@ const verify = async (req, res) => {
     res.json({ isAuthenticated: false });
   }
 };
-const admn = async (req, res) => {
+const admin = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
     res.json(user);
